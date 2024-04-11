@@ -1,8 +1,8 @@
 // controllers/testController.js
 
-const {  logTracesInMemory } = require("../telemetry");
+import { logTracesInMemory } from "../restsensev2/telemetry.js";
 
-exports.getTest = (req, res) => {
+export function getTest(req, res) {
     console.log('Hello World from service /test'+ logTracesInMemory());
     res.send('Hello World from service /test');
-};
+}

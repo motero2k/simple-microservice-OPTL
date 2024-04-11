@@ -4,18 +4,19 @@
 
 'use strict'
 
-const process = require('process');
-const opentelemetry = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-base');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { InMemoryExporter } from './InMemoryExporter.js';
 
 // configure the SDK to export telemetry data to the console
 // enable all auto-instrumentations from the meta package
 const traceExporter = new ConsoleSpanExporter();
-const sdk = new opentelemetry.NodeSDK({
+const sdk = new NodeSDK({
   resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: 'my-service',
   }),
@@ -24,13 +25,11 @@ const sdk = new opentelemetry.NodeSDK({
 });
 
 // initialize the SDK and register with the OpenTelemetry API
-const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
-const { InMemorySpanExporter } = require('@opentelemetry/sdk-trace-base');
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 
 // Create an in-memory span exporter
-const inMemoryExporter = new InMemorySpanExporter();
-
+export const inMemoryExporter = new InMemoryExporter();
 // Create a tracer provider
 const tracerProvider = new NodeTracerProvider();
 
@@ -40,11 +39,9 @@ tracerProvider.addSpanProcessor(new SimpleSpanProcessor(inMemoryExporter));
 // Register the tracer provider
 tracerProvider.register();
 
-// Retrieve the current tracer
-const tracer = tracerProvider.getTracer('example-tracer-js');
 
 // Function to log traces in memory
-function logTracesInMemory() {
+export function logTracesInMemory() {
     // count spans in memory
     const spanCount = inMemoryExporter.getFinishedSpans().length;
     return `Span count: ${spanCount}`;
@@ -56,10 +53,3 @@ function flushTraces() {
         console.log('Spans flushed');
     });
 }
-
-
-// Export functions for external usage
-module.exports = {
-
-    logTracesInMemory
-};

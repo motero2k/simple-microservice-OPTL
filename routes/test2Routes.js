@@ -1,12 +1,12 @@
 // routes/test2Routes.js
 
-const express = require('express');
-const router = express.Router();
+import { Router } from 'express';
+const router = Router();
 
 // Importa el controlador
-const test2Controller = require('../controllers/test2Controller');
+import { getTest2 } from '../controllers/test2Controller.js';
 
 // Define la ruta y asigna el controlador
-router.get('/', test2Controller.getTest2);
+router.get('/', getTest2);
 
-module.exports = router;
+export default router;
