@@ -21,6 +21,10 @@ app.get('/stopTelemetry', (req, res) => {
     inMemoryExporter.stop();
     res.send('Telemetry stopped');
 });
+app.get('/resetTelemetry', (req, res) => {
+    inMemoryExporter.reset();
+    res.send('Telemetry reset');
+});
 
 
 
@@ -40,6 +44,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/Telemetry', (req, res) => {
+    inMemoryExporter.forceFlush();
     const spansDB = inMemoryExporter.getFinishedSpans();
     spansDB.find({},(err, docs) => {
         if (err) {
@@ -66,6 +71,19 @@ app.post('/TelemetrySearch', (req, res) => {
         res.send({ spansCount: spans.length, spans: spans });
     });
 
+});
+import { startClock, stopClock } from './restsensev2/auxTelemetry.js';
+let clockId;
+
+app.get('/startClock', (req, res) => {
+    clockId = startClock();
+    res.send('Clock started: ' + clockId);
+});
+
+app.get('/stopClock', (req, res) => {
+    const clockId = req.query.clockId;
+    stopClock(clockId);
+    res.send(`Clock ${clockId} stopped`);
 });
 
 
