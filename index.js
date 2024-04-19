@@ -1,8 +1,12 @@
 // index.js
-import { inMemoryExporter as InMemoryExporter } from './restsensev2/telemetry.js';
+//TELEMETRY, allays at the top of the file
+import { inMemoryExporter } from './restsensev2/telemetry.js';
 
+
+//Rest of the code
 import express from 'express';
 const app = express();
+app.use(express.json());
 import testRoutes from './routes/testRoutes.js';
 import test2Routes from './routes/test2Routes.js';
 
@@ -10,41 +14,61 @@ import test2Routes from './routes/test2Routes.js';
 app.use('/test', testRoutes);
 app.use('/test2', test2Routes);
 app.get('/startTelemetry', (req, res) => {
-    InMemoryExporter.start();
+    inMemoryExporter.start();
     res.send('Telemetry started');
 });
 app.get('/stopTelemetry', (req, res) => {
-    InMemoryExporter.stop();
+    inMemoryExporter.stop();
     res.send('Telemetry stopped');
 });
 
-function removeCircular(obj) {
-    const seen = new WeakMap(); // Used to keep track of visited objects
 
-    // Replacer function to handle circular references
-    function replacer(key, value) {
-        if (typeof value === "object" && value !== null) {
-            // If the object has been visited before, return the name prefixed with "CIRCULAR+"
-            if (seen.has(value)) {
-                const objName = seen.get(value);
-                return `CIRCULAR+${objName}`;
-            }
-            seen.set(value, key); // Mark the object as visited with its name
-        }
-        return value;
-    }
 
-    // Convert the object to a string and then parse it back
-    // This will trigger the replacer function to handle circular references
-    const jsonString = JSON.stringify(obj, replacer);
-    return JSON.parse(jsonString);
-}
-app.get('/Telemetry', (req, res) => {
-    const spans = InMemoryExporter.getFinishedSpans();
-    const cleanSpans = spans.map(obj => removeCircular(obj));
-    res.send({ spansCount : cleanSpans.length ,spans: cleanSpans });
-});
 const port = process.env.PORT || 3000;
+app.get('/', (req, res) => {
+    let text = `
+    <h1>Dynamic Restsense showcase</h1>
+    <h2>Available routes:</h2>
+    <ul>
+        <li><a href="/test">/test</a></li>
+        <li><a href="/test2">/test2</a></li>
+        <li><a href="/startTelemetry">/startTelemetry</a></li>
+        <li><a href="/stopTelemetry">/stopTelemetry</a></li>
+        <li><a href="/Telemetry">/Telemetry</a></li>`
+    res.send(text);
+});
+
+
+app.get('/Telemetry', (req, res) => {
+    const spansDB = inMemoryExporter.getFinishedSpans();
+    spansDB.find({},(err, docs) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        const spans = docs;
+        res.send({ spansCount: spans.length, spans: spans });
+    });
+    // res.send(spans);
+});
+app.post('/TelemetrySearch', (req, res) => {
+    const spansDB = inMemoryExporter.getFinishedSpans();
+    const search = req.body;
+    console.log(search);
+    console.log(typeof search);
+    spansDB.find(search,(err, docs) => {
+        if (err) {
+            console.error(err);
+            res.send({ spansCount: "error", spans: [] });
+            return;
+        }
+        const spans = docs;
+        res.send({ spansCount: spans.length, spans: spans });
+    });
+
+});
+
+
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });
