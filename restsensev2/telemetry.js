@@ -12,7 +12,7 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 // import { InMemoryExporter } from '@restsense/agent/api/exporters';
-import { InMemoryExporter } from './InMemoryExporter.js';
+import { InMemoryExporter } from './exporters/InMemoryDbExporter.js';
 
 
 // initialize the SDK and register with the OpenTelemetry API
