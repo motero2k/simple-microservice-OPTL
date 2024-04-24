@@ -1,6 +1,6 @@
 // index.js
 //TELEMETRY, allays at the top of the file
-import { inMemoryExporter } from './restsensev2/telemetry.js';
+import oasTelemetry from './oas-telemetry/index.js';
 
 
 //Rest of the code
@@ -14,14 +14,10 @@ import test2Routes from './routes/test2Routes.js';
 app.use('/test', testRoutes);
 app.use('/test2', test2Routes);
 
-import newTelemetryMiddelware from './restsensev2/telemetryMiddelware.js';
 
-const telemetryConfig = {
-    exporter: inMemoryExporter,
-    baseURL: '/telemetry',
-};
 
-app.use(newTelemetryMiddelware(telemetryConfig));
+
+app.use(oasTelemetry());
 
 
 
@@ -41,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 
-import { startClock, stopClock } from './restsensev2/auxTelemetry.js';
+import { startClock, stopClock } from './oas-telemetry/auxTelemetry.js';
 let clockId;
 
 app.get('/startClock', (req, res) => {

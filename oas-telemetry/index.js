@@ -1,4 +1,5 @@
 // telemetryMiddleware.js
+import { inMemoryExporter } from './telemetry.js';
 import { Router } from 'express';
 
 
@@ -20,10 +21,17 @@ import { Router } from 'express';
 //     inMemoryExporter.reset();
 //     res.send('Telemetry reset');
 // });
-export default newTelemetryMiddelware;
-let telemetryConfig ;
-export function newTelemetryMiddelware(tlConfig) {
-    telemetryConfig = tlConfig;
+export default oasTelemetry;
+let telemetryConfig = {
+    exporter: inMemoryExporter,
+    baseURL: '/telemetry'
+
+};
+export function oasTelemetry(tlConfig) {
+    if(tlConfig) {
+        console.log('Telemetry config provided');
+        telemetryConfig = tlConfig;
+    }
     const router = Router();
     const baseURL = telemetryConfig.baseURL;
     router.get(baseURL, landingPage);
